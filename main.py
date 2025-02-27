@@ -5,7 +5,7 @@
 
 # Imports
 import os
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, Response
 from google.cloud import storage
 import random
 import string
@@ -17,36 +17,37 @@ import google.auth
 from PIL import Image
 from dotenv import load_dotenv
 
+
 app = Flask(__name__)
 
-# Generate a random name for the image and json files
+# Connect to cloud storage bucket
+def getBucket():
+    bucket = 'cot4930private'
+    storage_client = storage.Client()
+    bucket = storage_client.bucket(bucket)
+    return bucket
+
+# Generate a random name for both images and json files
 def randomNameGenerator():
     name_length = 6
     random_name = ''.join(random.choices(string.ascii_letters + string.digits, k=name_length))
     return random_name
 
 # Saves pictures that were uploaded by user to
-# google cloud storage
-# the same of the image is the same as the associated json
-# file
+# Google cloud storage
+# The same of the image is the same as the associated json
 def saveImagesToCloudStorage(file, randomName):
-    bucket = 'cot4930-001-bucket'
-    storage_client = storage.Client()
-    bucket = storage_client.bucket(bucket)
+    bucket = getBucket()
     filename = file.filename
-    print(filename)
     fileType = os.path.splitext(filename)[1][1:].strip().lower()
     newName = randomName + '.' + fileType
-    print(fileType)
     blob = bucket.blob(newName)
     blob.upload_from_file(file)
 
 # Save JSON title and decription to google cloud bucket
 # json file name is the same as the associated image
 def saveJSONTOCloudStorage(randomName, json_data):
-    bucket = 'cot4930-001-bucket'
-    storage_client = storage.Client()
-    bucket = storage_client.bucket(bucket)
+    bucket = getBucket()
     randomFileName = randomName + '.json'
     title = json_data["title"]
     description = json_data["description"]
@@ -73,24 +74,23 @@ def getImageDescription(file,GEMINI_API_KEY):
 def getAPIkey():
     load_dotenv()
     GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
-    print(GEMINI_API_KEY)
     return GEMINI_API_KEY
 
-# load images stored in cloud bucket
-# load and parse the json files with title and description
+# Load images stored in cloud bucket
+# Load and parse the json files with title and description
 def loadImagesFromCloudStorage():
-    bucket = 'cot4930-001-bucket'
-    storage_client = storage.Client()
-    bucket = storage_client.bucket(bucket)
+    bucket = getBucket()
     blobs = bucket.list_blobs()
-    image_urls = []
+    image_names = []
     titles = []
     descriptions = []
     for blob in blobs:
         # loop over blobs for image files
         # store the url in a list
         if blob.name.endswith(('.jpg', '.jpeg')):
-            image_urls.append(blob.public_url)
+            #image_urls.append(blob.public_url)
+            image_names.append(blob.name)
+            #print(image_names)
         # loop over blobs for json files
         # parse the json file for title and description   
         if blob.name.endswith(('.json')):
@@ -98,17 +98,24 @@ def loadImagesFromCloudStorage():
             data = json.loads(json_data)
             titles.append(data.get('title'))
             descriptions.append(data.get('description'))
-    return image_urls, titles, descriptions
+    return image_names,titles, descriptions
 
-# Fuction to return index.html
-# a call to load images is called
-# lists, for image urls, titles, description and the length of the list
-# is passed to index.
+# Main entry point into app - returns index.html and passes all values to it
 @app.route('/')
 def index():
-    image_urls, titles, descriptions = loadImagesFromCloudStorage()
-    length = len(image_urls)
-    return render_template('index.html', image_urls=image_urls, titles = titles, descriptions = descriptions, length = length)
+    image_filenames, titles, descriptions = loadImagesFromCloudStorage()
+    num = len(image_filenames)
+    return render_template('index.html', image_filenames=image_filenames, titles=titles, descriptions=descriptions,num = num)
+
+# Serve image for html
+@app.route('/image/<image_filename>')
+def serve_image(image_filename):
+    bucket = getBucket()
+    blob = bucket.blob(image_filename)
+    # Download the image as bytes
+    image_data = blob.download_as_bytes()
+    # Return the image with the appropriate content type
+    return Response(image_data, mimetype='image/jpeg')
 
 # function is called when the form is submitted 
 # image is saved
@@ -125,6 +132,6 @@ def upload_image():
     saveJSONTOCloudStorage(randomName, json_data)
     return redirect(url_for('index'))
 
-
+# main
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8080)
+    app.run(host='0.0.0.0', port=8080, debug=True)
