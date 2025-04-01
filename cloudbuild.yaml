@@ -1,21 +1,30 @@
 options:
-  logging: CLOUD_LOGGING_ONLY 
+  logging: CLOUD_LOGGING_ONLY  # Logs will be sent to Cloud Logging only, no logs to Cloud Storage.
 
 steps:
+  # Step 1: Build the Docker image
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'gcr.io/$PROJECT_ID/my-python-app', '.']
+    args: ['build', '-t', 'us-docker.pkg.dev/$PROJECT_ID/my-repository/my-python-app:$COMMIT_SHA', '.']
     env:
-      - 'GEMINI_API_KEY=$_GEMINI_API_KEY'  # Use the custom substitution with _ prefix
+      - 'GEMINI_API_KEY=$_GEMINI_API_KEY'  # Pass API key through environment variable.
 
-  # Push the image to Artifact Registry
+  # Step 2: Push the Docker image to Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
     args: ['push', 'us-docker.pkg.dev/$PROJECT_ID/my-repository/my-python-app:$COMMIT_SHA']
     env:
-      - 'GEMINI_API_KEY=$_GEMINI_API_KEY'  # Use the custom substitution with _ prefix
-
-
-substitutions:
-  _GEMINI_API_KEY: 'AIzaSyCiQE5UVL3q9YCCVJxCBwV3CGibhwLMeMQ'  # Define the custom substitution value
+      - 'GEMINI_API_KEY=$_GEMINI_API_KEY'  # Pass API key through environment variable.
 
 images:
-  - 'gcr.io/$PROJECT_ID/my-python-app:$COMMIT_SHA'
+  - 'us-docker.pkg.dev/$PROJECT_ID/my-repository/my-python-app:$COMMIT_SHA'
+
+substitutions:
+  _GEMINI_API_KEY: 'AIzaSyCiQE5UVL3q9YCCVJxCBwV3CGibhwLMeMQ'  # Replace with the actual API key value (this can also be passed securely)
+
+
+
+
+
+
+
+
+
