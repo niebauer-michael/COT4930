@@ -17,7 +17,6 @@ steps:
 images:
   - 'us-docker.pkg.dev/cot4930-001/automationcd/my-python-app:$COMMIT_SHA'
 
-
 substitutions:
   _GEMINI_API_KEY: 'AIzaSyCiQE5UVL3q9YCCVJxCBwV3CGibhwLMeMQ'  # Replace with the actual API key value (this can also be passed securely)
 
