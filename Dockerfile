@@ -1,32 +1,28 @@
-# Step 1: Use the official Python base image
 FROM python:3.9-slim
 
-# Step 2: Set environment variables
+# Set Python to run in unbuffered mode
 ENV PYTHONUNBUFFERED=1
-ENV PORT=8080
 
-# Step 3: Create and set the working directory in the container
+# Create and set the working directory in the container
 WORKDIR /app
 
-# Step 4: Copy requirements file into the container
+# Copy requirements file into the container
 COPY requirements.txt /app/
 
-# Step 5: Install dependencies including testing dependencies
+# Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Step 6: Install testing dependencies (if not in requirements.txt)
-# If you have a testing section in requirements.txt, you don't need this line
-# RUN pip install pytest
-
-# Step 7: Copy the rest of the application code into the container
+# Copy the application code into the container
 COPY . /app/
 
-# Step 8: Run tests (optional, if you want to run tests during build)
-# This will run pytest and stop the build if tests fail
+# Ensure you're in the correct directory
+WORKDIR /app
+
+# Run tests (adjust this based on your directory structure)
 RUN pytest --maxfail=1 --disable-warnings -q
 
-# Step 9: Expose the port your app will listen on
+# Expose port
 EXPOSE 8080
 
-# Step 10: Run the application
+# Run the application with gunicorn
 CMD ["gunicorn", "-b", "0.0.0.0:8080", "app:app"]
