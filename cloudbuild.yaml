@@ -4,12 +4,14 @@ options:
 steps:
   # Step 1: Build the Docker image
   - name: 'gcr.io/cloud-builders/docker'
+    id: Build Docker Image
     args: ['build', '-t', 'us-docker.pkg.dev/cot4930-001/automationcd/production:$COMMIT_SHA', '.']
     env:
       - 'GEMINI_API_KEY=$_GEMINI_API_KEY'  # Pass the API key securely as an environment variable.
 
   # Step 2: Push the Docker image to Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
+    id: Push Docker Image
     args: ['push', 'us-docker.pkg.dev/cot4930-001/automationcd/production:$COMMIT_SHA']
     env:
       - 'GEMINI_API_KEY=$_GEMINI_API_KEY'  # Pass the API key securely as an environment variable.
