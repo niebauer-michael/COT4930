@@ -1,25 +1,32 @@
-# Use the official Python image from DockerHub
-FROM python:3.8-slim
+# Step 1: Use the official Python base image
+FROM python:3.9-slim
 
-# Set the working directory inside the container
+# Step 2: Set environment variables
+ENV PYTHONUNBUFFERED=1
+ENV PORT=8080
+
+# Step 3: Create and set the working directory in the container
 WORKDIR /app
 
-# Set environment variable for API Key
-ENV GEMINI_API_KEY=$GEMINI_API_KEY
-
-# Copy the requirements file into the container
+# Step 4: Copy requirements file into the container
 COPY requirements.txt /app/
 
-# Install the dependencies
-RUN pip install -r requirements.txt
+# Step 5: Install dependencies including testing dependencies
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of the application code into the container
+# Step 6: Install testing dependencies (if not in requirements.txt)
+# If you have a testing section in requirements.txt, you don't need this line
+# RUN pip install pytest
+
+# Step 7: Copy the rest of the application code into the container
 COPY . /app/
 
-# Expose the port the app will run on (adjust if needed)
+# Step 8: Run tests (optional, if you want to run tests during build)
+# This will run pytest and stop the build if tests fail
+RUN pytest --maxfail=1 --disable-warnings -q
+
+# Step 9: Expose the port your app will listen on
 EXPOSE 8080
 
-
-
-# Run the Python application (adjust the entry point if needed)
-CMD ["python", "main.py"]
+# Step 10: Run the application
+CMD ["gunicorn", "-b", "0.0.0.0:8080", "app:app"]
