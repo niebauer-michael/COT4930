@@ -2,7 +2,7 @@
 Flask==3.0.2
 
 # https://pypi.org/project/gunicorn
-gunicorn==23.0.0
+gunicorn==20.1.0
 
 #https://pypi.org/project/google-generativeai/
 google-generativeai==0.1.0rc2
