@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href=
+    "https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <title>an·no·ta·tion</title>
+</head>
+<body style="background-color:grey">
+    <div>
+    <div class="container-sm">
+        <br><br><br>
+        <div class="mb-3">
+            <form action="/upload" method="POST" enctype="multipart/form-data">
+
+                <h1>edited</h1>
+                <h1>edited</h1>
+
+
+
+
+
+
+
+
+
+
+                <h1>an·no·ta·tion</h1>
+                <h6>let AI describe your images</h6>
+                <button type="submit">Upload</button>
+                <input type="file" id="file" name="file" accept="image/jpeg" accept="image/jpg" required><br><br>
+            </form>
+        </div>
+        {% for i in range(0, num) %}
+                <div>
+                <img src="{{ url_for('serve_image', image_filename=image_filenames[i]) }}" alt="{{ image_filename }}" style="max-width: 400px; margin: 10px;">
+                <p>{{titles[i]}}</p>
+                <p>{{descriptions[i]}}</p>
+                <hr>
+                <br>
+                </div>
+        {% endfor %}
+</div>
+</div>
+    <script src=
+"https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js">
+    </script>
+</body>
+</html>
