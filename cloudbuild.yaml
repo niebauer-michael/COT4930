@@ -7,8 +7,15 @@ steps:
     env:
       - 'GEMINI_API_KEY=$_GEMINI_API_KEY'  # Use the custom substitution with _ prefix
 
+  # Push the image to Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'us-docker.pkg.dev/$PROJECT_ID/my-repository/my-python-app:$COMMIT_SHA']
+    env:
+      - 'GEMINI_API_KEY=$_GEMINI_API_KEY'  # Use the custom substitution with _ prefix
+
+
 substitutions:
   _GEMINI_API_KEY: 'AIzaSyCiQE5UVL3q9YCCVJxCBwV3CGibhwLMeMQ'  # Define the custom substitution value
 
 images:
-  - 'gcr.io/$PROJECT_ID/my-python-app'
+  - 'gcr.io/$PROJECT_ID/my-python-app:$COMMIT_SHA'
