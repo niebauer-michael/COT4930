@@ -14,24 +14,14 @@ app = Flask(__name__)
 
 API_KEY = 'AIzaSyDKEqNxdilZfuE-IFymWgVnfOpjXqjabUg'
 
-genai.configure(api_key=API_KEY)  # Optionally, use a service account for authentication
 
+app = Flask(__name__)
 
-def generate_content(user_input):
-    # Call the Google Generative AI API to generate content based on the user's input
-    try:
-        response = genai.generate_text(
-            model="models/text-bison-001",  # Choose the model you want to use
-            prompt=user_input,
-            temperature=0.7,  # Adjust the temperature for creativity (0.0 to 1.0)
-            max_output_tokens=150  # Max tokens in the response
-        )
-        return response.text.strip()
-    except Exception as e:
-        return f"Error generating content: {e}"
+# Configure the Google Generative AI API client (using API key or authentication)
+genai.configure(api_key="AIzaSyDKEqNxdilZfuE-IFymWgVnfOpjXqjabUg")  # Optionally, use a service account for authentication
 
-
-@app.route("/", methods=['GET', 'POST'])
+# Route for home page and form submission
+@app.route('/', methods=['GET', 'POST'])
 def index():
     image_url = None
     generated_caption = None
@@ -61,7 +51,7 @@ def generate_caption(image_path):
 
         # Call the Google Generative AI API to generate text (caption)
         response = genai.generate_text(
-            model="models/text-bison-001",  # You can choose another model if needed
+            model="gemini-1.5-flash",  # You can choose another model if needed
             prompt=prompt,
             temperature=0.7,  # Control creativity level (0.0 to 1.0)
             max_output_tokens=50  # Limit caption length
@@ -73,18 +63,6 @@ def generate_caption(image_path):
     except Exception as e:
         return f"Error generating caption: {str(e)}"
 
-
-
-
-
-
-
-
-@app.route('/upload', methods=['POST'])
-def upload_image():
-    file = request.files['file']
-    print('upload worked')
-    return redirect(url_for('index'))
 
 if __name__ == "__main__":
     # Flask's built-in server running on port 8080
