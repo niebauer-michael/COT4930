@@ -1,6 +1,5 @@
 options:
   logging: CLOUD_LOGGING_ONLY  # Cloud Build logs will be sent only to Cloud Logging.
-
 steps:
   # Step 1: Build Docker image for the Blue Version (using the same Dockerfile)
   - name: 'gcr.io/cloud-builders/docker'
@@ -61,7 +60,7 @@ steps:
       - '--set-env-vars'
       - 'BACKGROUND_COLOR=green'
 
-  # Step 8: Fetch Latest Revision Names for Blue and Green Services
+  # Step 8: Fetch the latest revision names for blue and green services and split traffic
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
     args:
@@ -70,11 +69,13 @@ steps:
           # Fetch the latest revision names for blue and green services
           BLUE_REVISION=$(gcloud run services describe production-blue --region us-central1 --platform managed --format 'value(status.latestRevision.name)')
           GREEN_REVISION=$(gcloud run services describe production-green --region us-central1 --platform managed --format 'value(status.latestRevision.name)')
+          
+          # Print out the revisions for debugging
           echo "Blue Revision: $BLUE_REVISION"
           echo "Green Revision: $GREEN_REVISION"
           
-          # Update traffic split after getting the revision names
-          gcloud run services update-traffic production \
+          # Split traffic between the two revisions, 50% each
+          gcloud run services update-traffic production-blue \
             --region us-central1 \
             --platform managed \
             --to-revisions $BLUE_REVISION=50,$GREEN_REVISION=50
