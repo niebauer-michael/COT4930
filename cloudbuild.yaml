@@ -1,5 +1,6 @@
 options:
   logging: CLOUD_LOGGING_ONLY  # Cloud Build logs will be sent only to Cloud Logging.
+
 steps:
   # Step 1: Build Docker image for the Blue Version (using the same Dockerfile)
   - name: 'gcr.io/cloud-builders/docker'

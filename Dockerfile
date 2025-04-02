@@ -24,5 +24,7 @@ RUN pytest --maxfail=1 --disable-warnings -q
 # Expose the correct port (Cloud Run expects your container to listen on port 8080)
 EXPOSE 8080
 
+ENV BACKGROUND_COLOR=blue
+
 # Run the app using Flask's built-in server (main.py is the entry point now)
 CMD ["python", "main.py"]
