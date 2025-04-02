@@ -105,6 +105,7 @@ def loadImagesFromCloudStorage():
 # Route for home page and form submission
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    color = request.args.get('color', 'green')
     image_filenames, titles, descriptions = loadImagesFromCloudStorage()
     
     num = len(image_filenames)
@@ -117,7 +118,7 @@ def index():
         saveImagesToCloudStorage(file, randomName)
         json_data = getImageDescription(file)
         saveJSONTOCloudStorage(randomName, json_data)
-    return render_template('index.html', image_filenames=image_filenames, titles=titles, descriptions=descriptions,num = num)
+    return render_template('index.html', image_filenames=image_filenames, titles=titles, descriptions=descriptions,num = num, color=color)
     
 # Serve image for html
 @app.route('/image/<image_filename>')
