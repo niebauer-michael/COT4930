@@ -61,14 +61,14 @@ steps:
       - '--set-env-vars'
       - 'BACKGROUND_COLOR=green'
 
-  # Step 8: Split Traffic Between Blue and Green Versions (using integer percentages)
+  # Step 8: Split Traffic Between Blue and Green Versions
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     args:
       - 'gcloud'
       - 'run'
       - 'services'
       - 'update-traffic'
-      - 'production'
+      - 'production-blue'
       - '--region'
       - 'us-central1'
       - '--platform'
