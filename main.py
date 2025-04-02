@@ -3,6 +3,9 @@ from flask import Flask
 
 app = Flask(__name__)
 
+API_KEY = 'AIzaSyDKEqNxdilZfuE-IFymWgVnfOpjXqjabUg'
+
+
 @app.route("/")
 def hello():
     return "Hello, World!!"
