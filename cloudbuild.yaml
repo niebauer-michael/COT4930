@@ -1,23 +1,25 @@
 options:
   logging: CLOUD_LOGGING_ONLY  # Cloud Build logs will be sent only to Cloud Logging.
 
+# Reference to the secret stored in Google Cloud Secret Manager
+secrets:
+  - secretManager: "projects/cot4930-001/secrets/API_Key/versions/latest"  # Secret Manager reference
+    env: "API_KEY"  # The environment variable to store the secret in
+
 steps:
   # Step 1: Build the Docker image
   - name: 'gcr.io/cloud-builders/docker'
     id: Build Docker Image
     args: ['build', '-t', 'us-docker.pkg.dev/cot4930-001/automationcd/production:$COMMIT_SHA', '.']
     env:
-      - 'GEMINI_API_KEY=$_GEMINI_API_KEY'  # Pass the API key securely as an environment variable.
+      - 'API_KEY=${API_KEY}'  # Access the API key securely from Secret Manager
 
   # Step 2: Push the Docker image to Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
     id: Push Docker Image
     args: ['push', 'us-docker.pkg.dev/cot4930-001/automationcd/production:$COMMIT_SHA']
     env:
-      - 'GEMINI_API_KEY=$_GEMINI_API_KEY'  # Pass the API key securely as an environment variable.
+      - 'API_KEY=${API_KEY}'  # Access the API key securely from Secret Manager
 
 images:
   - 'us-docker.pkg.dev/cot4930-001/automationcd/production:$COMMIT_SHA'
-
-substitutions:
-  _GEMINI_API_KEY: 'AIzaSyCiQE5UVL3q9YCCVJxCBwV3CGibhwLMeMQ'  # Replace with the actual API key value (this can also be passed securely)
