@@ -16,7 +16,20 @@
                 <h1>an·no·ta·tion</h1>
                 <h6>let AI describe your images</h6>
         
-
+                <h1>Upload an Image</h1>
+                <form method="POST" enctype="multipart/form-data">
+                    <input type="file" name="file" accept="image/*">
+                    <input type="submit" value="Upload">
+                </form>
+                
+                {% if image_data %}
+                    <h2>Uploaded Image:</h2>
+                    <img src="data:image/png;base64,{{ image_data|b64encode }}" alt="Uploaded Image" width="500">
+                {% endif %}
+                
+                {% if message %}
+                    <p>{{ message }}</p>
+                {% endif %}
 
         </div>                
     </div>

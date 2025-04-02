@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for, Response
+from flask import Flask, render_template, request, redirect, url_for, Response, send_file
 from google.cloud import storage
 import random
 import string
@@ -9,13 +9,43 @@ import io
 from PIL import Image
 from dotenv import load_dotenv
 import google.generativeai as genai
+import mimetypes
 
 app = Flask(__name__)
 
-# API_KEY = 'AIzaSyDKEqNxdilZfuE-IFymWgVnfOpjXqjabUg'
+genai.configure(api_key="AIzaSyDKEqNxdilZfuE-IFymWgVnfOpjXqjabUg")  # Optionally, use a service account for authentication
+
+#img = Image.open('image.jpg')
+
+#img = 'image.jpg'
+
+# Check the MIME type based on the file extension
+#mime_type, encoding = mimetypes.guess_type(img)
+
+#print(f"The MIME type of the image is: {mime_type}")
+
+#genai.configure(api_key=os.environ['GEMINI_API'])
+
+generation_config = {
+  "temperature": 1,
+  "top_p": 0.95,
+  "top_k": 64,
+  "max_output_tokens": 8192,
+  "response_mime_type": "application/json",
+}
+
+model = genai.GenerativeModel(
+  model_name="gemini-1.5-flash",
+#   generation_config=generation_config,
+  # safety_settings = Adjust safety settings
+  # See https://ai.google.dev/gemini-api/docs/safety-settings
+)
+
+PROMPT = "describe the image. end your response in json"
 
 
-app = Flask(__name__)
+
+
 
 # Configure the Google Generative AI API client (using API key or authentication)
 genai.configure(api_key="AIzaSyDKEqNxdilZfuE-IFymWgVnfOpjXqjabUg")  # Optionally, use a service account for authentication
@@ -23,28 +53,24 @@ genai.configure(api_key="AIzaSyDKEqNxdilZfuE-IFymWgVnfOpjXqjabUg")  # Optionally
 # Route for home page and form submission
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    if request.method == 'POST':
+        # Check if the post request has the file part
+        if 'file' not in request.files:
+            return render_template('index.html', message="No file part")
+        
+        file = request.files['file']
+        
+        if file.filename == '':
+            return render_template('index.html', message="No selected file")
+        
+        # Read the file into memory (don't save it)
+        image_bytes = file.read()
+        
+        # Send the image directly back to the user
+        return render_template('index.html', image_data=image_bytes)
+    
     return render_template('index.html')
 
-
-def generate_caption(image_path):
-    """Generates a caption for the uploaded image using Google Generative AI."""
-    try:
-        # Construct the prompt with image-related context
-        prompt = f"Generate a caption for this image: {image_path}"
-
-        # Call the Google Generative AI API to generate text (caption)
-        response = genai.generate_text(
-            model="gemini-1.5-flash",  # You can choose another model if needed
-            prompt=prompt,
-            temperature=0.7,  # Control creativity level (0.0 to 1.0)
-            max_output_tokens=50  # Limit caption length
-        )
-
-        # Return the generated caption
-        return response.text.strip()
-
-    except Exception as e:
-        return f"Error generating caption: {str(e)}"
 
 
 if __name__ == "__main__":
