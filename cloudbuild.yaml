@@ -16,7 +16,7 @@ steps:
 
   - name: 'gcr.io/cloud-builders/gcloud'
     args: ['run', 'deploy', 'production',
-         '--image', 'gcr.io/$cot4930-001/dockerrun:$SHORT_SHA',
+         '--image', 'gcr.io/cot4930-001/dockerrun:$SHORT_SHA',
          '--region', 'us-east1',
          '--platform', 'managed',
          '--allow-unauthenticated' # or other ingress settings
