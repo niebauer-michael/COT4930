@@ -36,11 +36,11 @@ steps:
       '--set-env-vars', 'COLOR=blue,API_KEY=${_API_KEY}'  # Set the color and API_KEY environment variables
     ]
 
-  # Step 5: Split traffic between blue and green revisions
+  # Step 5: Split traffic between blue and green revisions (Use the full revision names here)
   - name: 'gcr.io/cloud-builders/gcloud'
     args: [
       'run', 'services', 'update-traffic', 'production',
       '--region', 'us-east1',
       '--platform', 'managed',
-      '--to-revisions', 'production-blue-00001-9hp=50,production-green-00001-abc=50'
+      '--to-revisions', 'production-blue-00001-9hp=50,production-green-00002-xyz=50'
     ]
