@@ -3,7 +3,7 @@ options:
 
 # Reference to the secret stored in Google Cloud Secret Manager
 secrets:
-  - secretManager: "projects/cot4930-001/secrets/API_Key/versions/latest"  # Secret Manager reference
+  - secretManager: "projects/cot4930-001/secrets/API_key/versions/latest"  # Secret Manager reference
     env: "API_KEY"  # The environment variable to store the secret in
 
 steps:
