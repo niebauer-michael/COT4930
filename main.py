@@ -5,10 +5,6 @@ import random
 import string
 import json
 import requests
-from google.auth import compute_engine
-from google import genai
-from google.genai import types
-import google.auth
 from PIL import Image
 from dotenv import load_dotenv
 
