@@ -13,9 +13,9 @@ import mimetypes
 
 app = Flask(__name__)
 
-#genai.configure(api_key="AIzaSyDKEqNxdilZfuE-IFymWgVnfOpjXqjabUg")  # Optionally, use a service account for authentication
+genai.configure(api_key="AIzaSyDKEqNxdilZfuE-IFymWgVnfOpjXqjabUg")  # Optionally, use a service account for authentication
 
-genai.set_api_key('AIzaSyDKEqNxdilZfuE-IFymWgVnfOpjXqjabUg')
+
 
 #img = Image.open('image.jpg')
 
