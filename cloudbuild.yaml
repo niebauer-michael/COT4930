@@ -1,5 +1,3 @@
-
-
 steps:
   # Step 1: Build Docker image
   - name: gcr.io/cloud-builders/docker
@@ -22,7 +20,7 @@ steps:
         $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
     id: Push
 
-  # Step 3: Deploy the new revision to Cloud Run (without splitting traffic)
+  # Step 3: Deploy the new revision to Cloud Run (without specifying revisions)
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
     args:
       - run
