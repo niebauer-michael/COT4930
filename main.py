@@ -14,7 +14,7 @@ app = Flask(__name__)
 
 API_KEY = 'AIzaSyDKEqNxdilZfuE-IFymWgVnfOpjXqjabUg'
 
-genai.configure(API_KEY)  # Optionally, use a service account for authentication
+genai.configure(api_key=API_KEY)  # Optionally, use a service account for authentication
 
 
 def generate_content(user_input):
