@@ -2,28 +2,74 @@ options:
   logging: CLOUD_LOGGING_ONLY  # Cloud Build logs will be sent only to Cloud Logging.
 
 steps:
-  # Step 1: Build the Docker image
+  # Step 1: Build Docker image for the Blue Version (using $COMMIT_SHA as tag)
   - name: 'gcr.io/cloud-builders/docker'
-    id: Build Docker Image
-    args: ['build', '-t', 'us-docker.pkg.dev/cot4930-001/automationcd/production:$COMMIT_SHA', '.']
-    env:
-      - 'GEMINI_API_KEY=$_GEMINI_API_KEY'  # Pass the API key securely as an environment variable.
+    args: ['build', '-t', 'us-docker.pkg.dev/cot4930-001/automationcd/production-blue:$COMMIT_SHA', '.']
 
-  # Step 2: Push the Docker image to Artifact Registry
+  # Step 2: Build Docker image for the Green Version (using $COMMIT_SHA as tag)
   - name: 'gcr.io/cloud-builders/docker'
-    id: Push Docker Image
-    args: ['push', 'us-docker.pkg.dev/cot4930-001/automationcd/production:$COMMIT_SHA']
-    env:
-      - 'GEMINI_API_KEY=$_GEMINI_API_KEY'  # Pass the API key securely as an environment variable.
+    args: ['build', '-t', 'us-docker.pkg.dev/cot4930-001/automationcd/production-green:$COMMIT_SHA', '-f', 'Dockerfile.green', '.']
 
-images:
-  - 'us-docker.pkg.dev/cot4930-001/automationcd/production:$COMMIT_SHA'
+  # Step 3: Run tests (optional, modify based on your testing framework)
+  - name: 'gcr.io/cloud-builders/python'
+    args: ['-m', 'unittest', 'discover']
 
-substitutions:
-  _GEMINI_API_KEY: 'AIzaSyCiQE5UVL3q9YCCVJxCBwV3CGibhwLMeMQ'  # Replace with the actual API key value (this can also be passed securely)
+  # Step 4: Push Blue Version Docker image to Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'us-docker.pkg.dev/cot4930-001/automationcd/production-blue:$COMMIT_SHA']
 
+  # Step 5: Push Green Version Docker image to Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'us-docker.pkg.dev/cot4930-001/automationcd/production-green:$COMMIT_SHA']
 
+  # Step 6: Deploy Blue Version to Cloud Run with Background Color Set to Blue
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    args:
+      - 'gcloud'
+      - 'run'
+      - 'deploy'
+      - 'production-blue'
+      - '--image'
+      - 'us-docker.pkg.dev/cot4930-001/automationcd/production-blue:$COMMIT_SHA'
+      - '--platform'
+      - 'managed'
+      - '--region'
+      - 'us-central1'
+      - '--allow-unauthenticated'
+      - '--set-env-vars'
+      - 'BACKGROUND_COLOR=blue'
 
+  # Step 7: Deploy Green Version to Cloud Run with Background Color Set to Green
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    args:
+      - 'gcloud'
+      - 'run'
+      - 'deploy'
+      - 'production-green'
+      - '--image'
+      - 'us-docker.pkg.dev/cot4930-001/automationcd/production-green:$COMMIT_SHA'
+      - '--platform'
+      - 'managed'
+      - '--region'
+      - 'us-central1'
+      - '--allow-unauthenticated'
+      - '--set-env-vars'
+      - 'BACKGROUND_COLOR=green'
 
+  # Step 8: Split Traffic Between Blue and Green Versions
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    args:
+      - 'gcloud'
+      - 'run'
+      - 'services'
+      - 'update-traffic'
+      - 'production'
+      - '--to-latest'
+      - '--region'
+      - 'us-central1'
+      - '--platform'
+      - 'managed'
+      - '--traffic'
+      - 'production-blue=50,production-green=50'
 
-
+timeout: 1200s  # Set timeout as needed

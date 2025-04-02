@@ -12,7 +12,7 @@ import google.generativeai as genai
 
 app = Flask(__name__)
 
-API_KEY = 'AIzaSyDKEqNxdilZfuE-IFymWgVnfOpjXqjabUg'
+# API_KEY = 'AIzaSyDKEqNxdilZfuE-IFymWgVnfOpjXqjabUg'
 
 
 app = Flask(__name__)
@@ -23,33 +23,10 @@ genai.configure(api_key="AIzaSyDKEqNxdilZfuE-IFymWgVnfOpjXqjabUg")  # Optionally
 # Route for home page and form submission
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    image_url = None
-    generated_caption = None
+    color = os.getenv('BACKGROUND_COLOR', 'blue')  # Default to blue if no env var is set
+    return f'<html><body style="background-color: {color};">Hello, World!</body></html>'
 
-    response = genai.generate_text(
-    model="models/text-bison-001",  # Choose an appropriate model
-    prompt="What is the capital of France?",
-    temperature=0.5,
-    max_output_tokens=50
-    )
-    print(response.text)
-
-
-    if request.method == 'POST':
-        # Get the uploaded image file
-        file = request.files.get('image')
-        if file:
-            # Save the uploaded image temporarily (for displaying purposes)
-            image_path = os.path.join("static", file.filename)
-            file.save(image_path)
-
-            # Generate caption using Google Generative AI
-            generated_caption = generate_caption(image_path)
-            
-            # Set image URL for displaying on the webpage
-            image_url = f"/static/{file.filename}"
-
-    return render_template('index.html', image_url=image_url, generated_caption=generated_caption)
+   # return render_template('index.html')
 
 
 def generate_caption(image_path):
