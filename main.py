@@ -64,7 +64,7 @@ def saveJSONTOCloudStorage(randomName, json_data):
 
 def getImageDescription(file):
     image = Image.open(file)
-    image = image.resize(400, 400)
+    image = image.resize((300, 300), Image.Resampling.LANCZOS)
     model = genai.GenerativeModel('gemini-1.5-flash')
     # Generate content from an image and prompt
     response = model.generate_content([
