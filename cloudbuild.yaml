@@ -73,9 +73,7 @@ steps:
       - 'us-central1'
       - '--platform'
       - 'managed'
-      - '--traffic'
-      - 'production-blue=50'
-      - '--traffic'
-      - 'production-green=50'
+      - '--to-revisions'
+      - 'production-blue=0.5,production-green=0.5'
 
 timeout: 1200s  # Set timeout as needed
