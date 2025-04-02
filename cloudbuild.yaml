@@ -13,18 +13,19 @@ steps:
     args: ['push', 'us-docker.pkg.dev/cot4930-001/automationcd/production:$COMMIT_SHA']
     env:
       - 'API_KEY=${_API_KEY}'  # Reference the environment variable directly
-
   - name: 'gcr.io/cloud-builders/gcloud'
-    args: ['run', 'deploy', 'production',
-         '--image', 'gcr.io/cot4930-001/automationcd/production:$COMMIT_SHA',
+    args: ['run', 'deploy', 'production', # Cloud Run service name is 'production'
+         '--image', 'gcr.io/cot4930-001/automationcd:$COMMIT_SHA', # Corrected image name
          '--region', 'us-east1',
          '--platform', 'managed',
-         '--allow-unauthenticated' # or other ingress settings
-         # Add any other necessary Cloud Run flags
+         '--allow-unauthenticated'
+         # Add other necessary Cloud Run flags
         ]
 
 
-images:
-  - 'us-docker.pkg.dev/cot4930-001/automationcd/production:$COMMIT_SHA'
+
+
+#images:
+#  - 'us-docker.pkg.dev/cot4930-001/automationcd/production:$COMMIT_SHA'
 
 # You can omit substitutions if using an environment variable from the build environment directly
