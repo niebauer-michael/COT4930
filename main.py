@@ -5,6 +5,7 @@ import random
 import string
 import json
 import requests
+import io
 from PIL import Image
 from dotenv import load_dotenv
 import google.generativeai as genai
@@ -13,36 +14,7 @@ app = Flask(__name__)
 
 API_KEY = 'AIzaSyDKEqNxdilZfuE-IFymWgVnfOpjXqjabUg'
 
-
-
-def getImageCaption(file):
-    
-    genai.configure(api_key=API_KEY)
-    
-    image = Image.open(file)
-    
-    generation_config = {
-        "temperature": 1,
-        "top_p": 0.95,
-        "top_k": 64,
-        "max_output_tokens": 8192,
-        "response_mime_type": "application/json",
-    }
-
-    model = genai.GenerativeModel(
-    model_name="gemini-1.5-flash",
-    #   generation_config=generation_config,
-    # safety_settings = Adjust safety settings
-    # See https://ai.google.dev/gemini-api/docs/safety-settings
-    )
-
-    PROMPT = "describe the image. end your response in json"
-
-
-    response = model.generate_content()
-
-    # print(response)
-    print(response.text)
+genai.configure(API_KEY)  # Optionally, use a service account for authentication
 
 
 def generate_content(user_input):
@@ -57,10 +29,6 @@ def generate_content(user_input):
         return response.text.strip()
     except Exception as e:
         return f"Error generating content: {e}"
-
-
-
-
 
 
 @app.route("/", methods=['GET', 'POST'])
