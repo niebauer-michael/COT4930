@@ -26,6 +26,15 @@ def index():
     image_url = None
     generated_caption = None
 
+    response = genai.generate_text(
+    model="models/text-bison-001",  # Choose an appropriate model
+    prompt="What is the capital of France?",
+    temperature=0.5,
+    max_output_tokens=50
+    )
+    print(response.text)
+
+
     if request.method == 'POST':
         # Get the uploaded image file
         file = request.files.get('image')
