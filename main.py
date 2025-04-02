@@ -1,7 +1,13 @@
 # Michael Niebauer
 # COT 5930-007 COT 4930-001: Cloud Native Development
-# Project 2
-# Leverage the Gemini AI API in Google Cloud (multi modal LLM API) to get a caption and extract a description from the image
+# Project 3 - Implement change management to your application and 
+# create automation for deployment as well as automated testing. 
+# Upon completion 50% of your users should see a blue background, 
+# while the other 50% should see a green background on your front layer. 
+# Traffic should be split evenly and you should be able to run the 2
+#  versions of the application in parallel. Do not implement the split 
+# logic in your application.
+# 
 
 # Imports
 import os
@@ -102,16 +108,22 @@ def loadImagesFromCloudStorage():
             descriptions.append(data.get('description'))
     return image_names,titles, descriptions
     
+
 # Route for home page and form submission
 @app.route('/', methods=['GET', 'POST'])
 def index():
 
+    # get file names from cloud storage
     image_filenames, titles, descriptions = loadImagesFromCloudStorage()
     
+    # if no images pass 0 to the front
     num = len(image_filenames)
     if num is None:
         num = 0
-
+    # when the user submits an image
+    # a random number is generated for the name
+    # the image gets saved to cloud storage
+    # save title and caption in json format
     if request.method == 'POST':
         file = request.files['file']
         randomName = randomNameGenerator()
@@ -120,7 +132,7 @@ def index():
         saveJSONTOCloudStorage(randomName, json_data)
     return render_template('index.html', image_filenames=image_filenames, titles=titles, descriptions=descriptions,num = num)
     
-# Serve image for html
+# Serve images for html
 @app.route('/image/<image_filename>')
 def serve_image(image_filename):
     bucket = getBucket()
