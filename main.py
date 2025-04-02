@@ -24,6 +24,7 @@ def hello():
 
 @app.route('/upload', methods=['POST'])
 def upload_image():
+    file = request.files['file']
     print('upload worked')
     return redirect(url_for('index'))
 
