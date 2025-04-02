@@ -69,12 +69,13 @@ steps:
       - 'services'
       - 'update-traffic'
       - 'production'
-      - '--to-latest'
       - '--region'
       - 'us-central1'
       - '--platform'
       - 'managed'
       - '--traffic'
-      - 'production-blue=50,production-green=50'
+      - 'production-blue=50'
+      - '--traffic'
+      - 'production-green=50'
 
 timeout: 1200s  # Set timeout as needed
