@@ -24,5 +24,6 @@ steps:
       '--region', 'us-east1',
       '--platform', 'managed',
       '--allow-unauthenticated',
-      '--update-env-vars', 'API_KEY=${_API_KEY}'  # Optional: update environment variables
+      '--update-env-vars', 'API_KEY=${_API_KEY}',  # Optional: update environment variables
+      '--no-caching'
     ]
