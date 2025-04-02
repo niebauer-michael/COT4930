@@ -6,24 +6,24 @@ steps:
   - name: 'gcr.io/cloud-builders/docker'
     args: ['build', '-t', 'us-docker.pkg.dev/cot4930-001/automationcd/production:$COMMIT_SHA', '.']
     env:
-      - 'API_KEY=${_API_KEY}'  # Reference the environment variable directly
+      - 'API_KEY=${_API_KEY}'
 
   # Step 2: Push the Docker image to Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
     args: ['push', 'us-docker.pkg.dev/cot4930-001/automationcd/production:$COMMIT_SHA']
     env:
-      - 'API_KEY=${_API_KEY}'  # Reference the environment variable directly
+      - 'API_KEY=${_API_KEY}'
 
   # Step 3: Deploy the image to Cloud Run
   - name: 'gcr.io/cloud-builders/gcloud'
-    args: [
-      'run', 'deploy', 'production',  # Cloud Run service name is 'production'
-      '--image', 'us-docker.pkg.dev/cot4930-001/automationcd/production:$COMMIT_SHA',  # Corrected image name
-      '--region', 'us-east1',
-      '--platform', 'managed',
-      '--allow-unauthenticated'
-      # Add other necessary Cloud Run flags
-    ]
-
-#images:
-#  - 'us-docker.pkg.dev/cot4930-001/automationcd/production:$COMMIT_SHA'
+    args:
+      - 'run'
+      - 'deploy'
+      - 'production'  # Cloud Run service name is 'production'
+      - '--image'
+      - 'us-docker.pkg.dev/cot4930-001/automationcd/production:$COMMIT_SHA'  # Make sure $COMMIT_SHA is unique
+      - '--region'
+      - 'us-east1'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
