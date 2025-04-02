@@ -16,23 +16,8 @@
                 <h1>an·no·ta·tion</h1>
                 <h6>let AI describe your images</h6>
         
-    <!-- Form for image upload -->
-    <form method="POST" enctype="multipart/form-data">
-        <label for="image">Choose an image to upload:</label>
-        <input type="file" name="image" id="image" accept="image/*" required>
-        <button type="submit">Upload</button>
-    </form>
 
-    {% if image_url %}
-        <h2>Uploaded Image:</h2>
-        <img src="{{ image_url }}" alt="Uploaded Image" style="max-width: 500px; margin-top: 20px;">
-    {% endif %}
 
-    {% if generated_caption %}
-        <h2>Generated Caption:</h2>
-        <p>{{ generated_caption }}</p>
-    {% endif %}
-        
         </div>                
     </div>
     </div>

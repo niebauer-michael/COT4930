@@ -23,10 +23,7 @@ genai.configure(api_key="AIzaSyDKEqNxdilZfuE-IFymWgVnfOpjXqjabUg")  # Optionally
 # Route for home page and form submission
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    color = os.getenv('BACKGROUND_COLOR', 'blue')  # Default to blue if no env var is set
-    return f'<html><body style="background-color: {color};">Hello, World!</body></html>'
-
-   # return render_template('index.html')
+    return render_template('index.html')
 
 
 def generate_caption(image_path):
