@@ -1,58 +1,35 @@
+options:
+  logging: CLOUD_LOGGING_ONLY  # Cloud Build logs will be sent only to Cloud Logging.
+
 steps:
-  # Step 1: Build the Docker image for the Python Flask app
+  # Step 1: Build the Docker image
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'us-docker.pkg.dev/cot4930-001/automationcd/colored-page:$COMMIT_SHA', '.']
+    args: ['build', '-t', 'us-docker.pkg.dev/cot4930-001/automationcd/production:$COMMIT_SHA', '.']
     env:
-      - 'API_KEY=${_API_KEY}'
+      - 'API_KEY=${_API_KEY}'  # Reference the environment variable directly
 
   # Step 2: Push the Docker image to Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'us-docker.pkg.dev/cot4930-001/automationcd/colored-page:$COMMIT_SHA']
+    args: ['push', 'us-docker.pkg.dev/cot4930-001/automationcd/production:$COMMIT_SHA']
     env:
-      - 'API_KEY=${_API_KEY}'
+      - 'API_KEY=${_API_KEY}'  # Reference the environment variable directly
 
-  # Step 3: Deploy the blue version of the service
+  # Step 3: Deploy the new image to Cloud Run
   - name: 'gcr.io/cloud-builders/gcloud'
     args: [
-      'run', 'deploy', 'production-blue',
-      '--image', 'us-docker.pkg.dev/cot4930-001/automationcd/colored-page:$COMMIT_SHA',
+      'run', 'deploy', 'production',  # Cloud Run service name is 'production'
+      '--image', 'us-docker.pkg.dev/cot4930-001/automationcd/production:$COMMIT_SHA',  # Corrected image name
       '--region', 'us-east1',
       '--platform', 'managed',
-      '--allow-unauthenticated',
-      '--set-env-vars', 'COLOR=blue,API_KEY=${_API_KEY}'
+      '--allow-unauthenticated'
     ]
 
-  # Step 4: Deploy the green version of the service
+  # Step 4: Split traffic 50/50 between the new and the previous revision
   - name: 'gcr.io/cloud-builders/gcloud'
     args: [
-      'run', 'deploy', 'production-green',
-      '--image', 'us-docker.pkg.dev/cot4930-001/automationcd/colored-page:$COMMIT_SHA',
+      'run', 'services', 'update-traffic', 'production',  # Cloud Run service name
       '--region', 'us-east1',
       '--platform', 'managed',
-      '--allow-unauthenticated',
-      '--set-env-vars', 'COLOR=green,API_KEY=${_API_KEY}'
+      '--to-revision', 'production',  # Traffic to the new revision
+      '--split', '50=production,50=previous-revision'  # Adjust according to your revision names
     ]
-
-  # Step 5: Automatically get revision names and update traffic
-  - name: 'gcr.io/cloud-builders/gcloud'
-    entrypoint: 'bash'
-    args:
-      - '-c'
-      - |
-        # Fetch the latest revision names for blue and green versions
-        BLUE_REVISION=$(gcloud run revisions list --service production --platform managed --region us-east1 --filter="name:production-blue" --format="value(name)" | head -n 1)
-        GREEN_REVISION=$(gcloud run revisions list --service production --platform managed --region us-east1 --filter="name:production-green" --format="value(name)" | head -n 1)
-        
-        # Ensure both revisions exist before attempting to update traffic
-        if [ -z "$BLUE_REVISION" ] || [ -z "$GREEN_REVISION" ]; then
-          echo "One or both revisions are missing. Exiting."
-          exit 1
-        fi
-        
-        echo "Updating traffic to 50/50 split between $BLUE_REVISION and $GREEN_REVISION"
-        
-        # Update the traffic split to 50/50
-        gcloud run services update-traffic production \
-          --region us-east1 \
-          --platform managed \
-          --to-revisions $BLUE_REVISION=50,$GREEN_REVISION=50
