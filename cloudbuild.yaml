@@ -47,7 +47,7 @@ steps:
       - '--region=$_DEPLOY_REGION'
       - '--to-revisions'
       - >-
-        $_SERVICE_NAME=50,$_SERVICE_NAME-v2=50
+        production3-00006-l2r=50,production3-$COMMIT_SHA=50
     id: SplitTraffic
     entrypoint: gcloud
 
