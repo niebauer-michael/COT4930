@@ -27,3 +27,12 @@ steps:
       - '--platform'
       - 'managed'
       - '--allow-unauthenticated'
+
+        # Step 4: Update Traffic to the New Revision
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args: [
+      'run', 'services', 'update-traffic', 'production',
+      '--region', 'us-east1',
+      '--platform', 'managed',
+      '--to-revisions', '$(gcloud run revisions list --service=production --region=us-east1 --platform=managed --filter="status.state=READY" --format="value(METADATA.NAME)" | head -n 1)=100'
+    ]
