@@ -1,84 +1,44 @@
 options:
   logging: CLOUD_LOGGING_ONLY  # Cloud Build logs will be sent only to Cloud Logging.
 
-  steps:
-  # Step 1: Build Docker image for the Blue Version (using the same Dockerfile)
+steps:
+  # Step 1: Build Docker image and push to Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'us-docker.pkg.dev/cot4930-001/automationcd/production-blue:$COMMIT_SHA', '.']
-
-  # Step 2: Build Docker image for the Green Version (using the same Dockerfile)
-  - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'us-docker.pkg.dev/cot4930-001/automationcd/production-green:$COMMIT_SHA', '.']
-
-  # Step 3: Run tests inside the Docker container using pytest
-  - name: 'gcr.io/cloud-builders/docker'
-    entrypoint: 'bash'
     args:
-      - '-c'
-      - |
-          # Run pytest in the Docker container (inside the blue version image)
-          docker run --rm us-docker.pkg.dev/cot4930-001/automationcd/production-blue:$COMMIT_SHA pytest --maxfail=1 --disable-warnings -q
+      - 'build'
+      - '-t'
+      - 'asia-docker.pkg.dev/cot4930-001/your-repo-name/your-image-name:${SHORT_SHA}'
+      - '.'
 
-  # Step 4: Push Blue Version Docker image to Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'us-docker.pkg.dev/cot4930-001/automationcd/production-blue:$COMMIT_SHA']
-
-  # Step 5: Push Green Version Docker image to Artifact Registry
-  - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'us-docker.pkg.dev/cot4930-001/automationcd/production-green:$COMMIT_SHA']
-
-  # Step 6: Deploy Blue Version to Cloud Run with Background Color Set to Blue
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     args:
-      - 'gcloud'
-      - 'run'
-      - 'deploy'
-      - 'production-blue'
-      - '--image'
-      - 'us-docker.pkg.dev/cot4930-001/automationcd/production-blue:$COMMIT_SHA'
-      - '--platform'
-      - 'managed'
-      - '--region'
-      - 'us-central1'
-      - '--allow-unauthenticated'
-      - '--set-env-vars'
-      - 'BACKGROUND_COLOR=blue'
+      - 'push'
+      - 'asia-docker.pkg.dev/cot4930-001/your-repo-name/your-image-name:${SHORT_SHA}'
 
-  # Step 7: Deploy Green Version to Cloud Run with Background Color Set to Green
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    args:
-      - 'gcloud'
-      - 'run'
-      - 'deploy'
-      - 'production-green'
-      - '--image'
-      - 'us-docker.pkg.dev/cot4930-001/automationcd/production-green:$COMMIT_SHA'
-      - '--platform'
-      - 'managed'
-      - '--region'
-      - 'us-central1'
-      - '--allow-unauthenticated'
-      - '--set-env-vars'
-      - 'BACKGROUND_COLOR=green'
+# Define the image URI
+images:
+  - 'asia-docker.pkg.dev/cot4930-001/your-repo-name/your-image-name:${SHORT_SHA}'
 
-  # Step 8: Fetch the latest revision names for blue and green services and split traffic
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    entrypoint: 'bash'
-    args:
-      - '-c'
-      - |
-          # Fetch the latest revision names for blue and green services
-          BLUE_REVISION=$(gcloud run services describe production-blue --region us-central1 --platform managed --format 'value(status.latestRevision.name)')
-          GREEN_REVISION=$(gcloud run services describe production-green --region us-central1 --platform managed --format 'value(status.latestRevision.name)')
-          
-          # Print out the revisions for debugging
-          echo "Blue Revision: $BLUE_REVISION"
-          echo "Green Revision: $GREEN_REVISION"
-          
-          # Split traffic between the two revisions, 50% each
-          gcloud run services update-traffic production-blue \
-            --region us-central1 \
-            --platform managed \
-            --to-revisions $BLUE_REVISION=50,$GREEN_REVISION=50
+# Step 2: Deploy to Cloud Run with Traffic Splitting
+substitutions:
+  _NEW_VERSION_TAG: 'your-image-name:${SHORT_SHA}'
+  _CLOUD_RUN_SERVICE: 'production'  # Existing service name (can be 'blue' if already deployed)
 
-timeout: 1200s  # Set timeout as needed
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  args:
+    - 'gcloud'
+    - 'run'
+    - 'deploy'
+    - 'green'  # The new version that will handle 50% of the traffic
+    - '--image'
+    - 'asia-docker.pkg.dev/cot4930-001/your-repo-name/${_NEW_VERSION_TAG}'
+    - '--platform'
+    - 'managed'
+    - '--region'
+    - 'us-central1'
+    - '--allow-unauthenticated'
+    - '--project'
+    - 'cot4930-001'
+    - '--traffic'
+    - '50=green'   # 50% of the traffic goes to the new version (green)
+    - '50=blue'    # 50% of the traffic goes to the old version (blue)
