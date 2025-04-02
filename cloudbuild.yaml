@@ -61,19 +61,33 @@ steps:
       - '--set-env-vars'
       - 'BACKGROUND_COLOR=green'
 
-  # Step 8: Split Traffic Between Blue and Green Versions
+  # Step 8: Fetch Latest Revision Names for Blue and Green Services
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+          # Fetch the latest revision names for blue and green services
+          BLUE_REVISION=$(gcloud run services describe production-blue --region us-central1 --platform managed --format 'value(status.latestRevision.name)')
+          GREEN_REVISION=$(gcloud run services describe production-green --region us-central1 --platform managed --format 'value(status.latestRevision.name)')
+          echo "Blue Revision: $BLUE_REVISION"
+          echo "Green Revision: $GREEN_REVISION"
+          echo "REVISION_BLUE=$BLUE_REVISION" >> $STEP_ENVIRONMENT_VARIABLES
+          echo "REVISION_GREEN=$GREEN_REVISION" >> $STEP_ENVIRONMENT_VARIABLES
+
+  # Step 9: Split Traffic Between Blue and Green Versions
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     args:
       - 'gcloud'
       - 'run'
       - 'services'
       - 'update-traffic'
-      - 'production-blue'
+      - 'production'
       - '--region'
       - 'us-central1'
       - '--platform'
       - 'managed'
       - '--to-revisions'
-      - 'production-blue=50,production-green=50'
+      - '${REVISION_BLUE}=50,${REVISION_GREEN}=50'
 
 timeout: 1200s  # Set timeout as needed
