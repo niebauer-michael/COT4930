@@ -10,10 +10,14 @@ steps:
   - name: 'gcr.io/cloud-builders/docker'
     args: ['build', '-t', 'us-docker.pkg.dev/cot4930-001/automationcd/production-green:$COMMIT_SHA', '.']
 
-  # Step 3: Run tests (using the official Python 3.9-slim image)
-  - name: 'python:3.9-slim'  # Use the official Python 3.9-slim image for running tests
-    entrypoint: 'python'
-    args: ['-m', 'unittest', 'discover']
+  # Step 3: Run tests inside the Docker container using pytest
+  - name: 'gcr.io/cloud-builders/docker'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+          # Run pytest in the Docker container (inside the blue version image)
+          docker run --rm us-docker.pkg.dev/cot4930-001/automationcd/production-blue:$COMMIT_SHA pytest --maxfail=1 --disable-warnings -q
 
   # Step 4: Push Blue Version Docker image to Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
