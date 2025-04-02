@@ -24,6 +24,7 @@ substitutions:
   _NEW_VERSION_TAG: 'your-image-name:${SHORT_SHA}'
   _CLOUD_RUN_SERVICE: 'production'  # Existing service name (can be 'blue' if already deployed)
 
+# Deploy step with traffic splitting
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
   args:
     - 'gcloud'
