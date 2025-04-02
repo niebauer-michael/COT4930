@@ -16,10 +16,15 @@ API_KEY = 'AIzaSyDKEqNxdilZfuE-IFymWgVnfOpjXqjabUg'
 
 
 
-@app.route("/")
+@app.route("/", methods=['GET', 'POST'])
 def index():
     title = 'title'
     items = 'items'
+    submitted_text = None
+
+    if request.method == 'POST':
+        submitted_text = request.form['user_text']
+
     return render_template('index.html', title=title, items=items)
 
 @app.route('/upload', methods=['POST'])
