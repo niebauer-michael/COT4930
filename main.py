@@ -16,30 +16,6 @@ app = Flask(__name__)
 genai.configure(api_key="AIzaSyDKEqNxdilZfuE-IFymWgVnfOpjXqjabUg")  # Optionally, use a service account for authentication
 
 
-
-#img = Image.open('image.jpg')
-
-#img = 'image.jpg'
-
-# Check the MIME type based on the file extension
-#mime_type, encoding = mimetypes.guess_type(img)
-
-#print(f"The MIME type of the image is: {mime_type}")
-
-#genai.configure(api_key=os.environ['GEMINI_API'])
-
-
-response = genai.generate_text(
-    prompt="Tell me a joke about computers.",
-    model="text-bison-001"  # Example model name, verify in docs
-)
-
-print(response['text'])
-
-
-# Configure the Google Generative AI API client (using API key or authentication)
-genai.configure(api_key="AIzaSyDKEqNxdilZfuE-IFymWgVnfOpjXqjabUg")  # Optionally, use a service account for authentication
-
 # Route for home page and form submission
 @app.route('/', methods=['GET', 'POST'])
 def index():
