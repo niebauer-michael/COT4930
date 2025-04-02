@@ -17,7 +17,7 @@ API_KEY = 'AIzaSyDKEqNxdilZfuE-IFymWgVnfOpjXqjabUg'
 
 
 @app.route("/")
-def hello():
+def index():
     title = 'title'
     items = 'items'
     return render_template('index.html', title=title, items=items)
