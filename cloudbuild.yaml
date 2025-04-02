@@ -1,4 +1,5 @@
 steps:
+  # Step 1: Build Docker image
   - name: gcr.io/cloud-builders/docker
     args:
       - build
@@ -10,12 +11,16 @@ steps:
       - '-f'
       - Dockerfile
     id: Build
+
+  # Step 2: Push Docker image to the repository
   - name: gcr.io/cloud-builders/docker
     args:
       - push
       - >-
         $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
     id: Push
+
+  # Step 3: Deploy the new revision to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
     args:
       - run
@@ -31,12 +36,29 @@ steps:
       - '--quiet'
     id: Deploy
     entrypoint: gcloud
+
+  # Step 4: Split traffic 50/50 between the current and new revision
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
+    args:
+      - run
+      - services
+      - update-traffic
+      - $_SERVICE_NAME
+      - '--region=$_DEPLOY_REGION'
+      - '--to-revisions'
+      - >-
+        $_SERVICE_NAME=50,$_SERVICE_NAME-v2=50
+    id: SplitTraffic
+    entrypoint: gcloud
+
 images:
   - >-
     $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
+
 options:
   substitutionOption: ALLOW_LOOSE
   logging: CLOUD_LOGGING_ONLY
+
 substitutions:
   _AR_HOSTNAME: us-central1-docker.pkg.dev
   _AR_REPOSITORY: cloud-run-source-deploy
@@ -46,6 +68,7 @@ substitutions:
   REPO_NAME: cot4930
   _TRIGGER_ID: f0db5444-e4bd-4bd4-b547-28979bb36663
   _DEPLOY_REGION: us-central1
+
 tags:
   - gcp-cloud-build-deploy-cloud-run
   - gcp-cloud-build-deploy-cloud-run-managed
