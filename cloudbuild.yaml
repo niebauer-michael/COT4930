@@ -14,33 +14,33 @@ steps:
     env:
       - 'API_KEY=${_API_KEY}'  # Reference the environment variable directly
 
-  # Step 3: Deploy the Docker image to Cloud Run (Green Version)
+  # Step 3: Deploy the green version of the service (with environment variable API_KEY)
   - name: 'gcr.io/cloud-builders/gcloud'
     args: [
-      'run', 'deploy', 'production-green',  # Cloud Run service name for green version
+      'run', 'deploy', 'production-green',
       '--image', 'us-docker.pkg.dev/cot4930-001/automationcd/colored-page:$COMMIT_SHA',
       '--region', 'us-east1',
       '--platform', 'managed',
       '--allow-unauthenticated',
-      '--set-env-vars', 'COLOR=green'  # Set the color to green for this revision
+      '--set-env-vars', 'COLOR=green,API_KEY=${_API_KEY}'  # Set the color and API_KEY environment variables
     ]
 
-  # Step 4: Deploy the Docker image to Cloud Run (Blue Version)
+  # Step 4: Deploy the blue version of the service (with environment variable API_KEY)
   - name: 'gcr.io/cloud-builders/gcloud'
     args: [
-      'run', 'deploy', 'production-blue',  # Cloud Run service name for blue version
+      'run', 'deploy', 'production-blue',
       '--image', 'us-docker.pkg.dev/cot4930-001/automationcd/colored-page:$COMMIT_SHA',
       '--region', 'us-east1',
       '--platform', 'managed',
       '--allow-unauthenticated',
-      '--set-env-vars', 'COLOR=blue'  # Set the color to blue for this revision
+      '--set-env-vars', 'COLOR=blue,API_KEY=${_API_KEY}'  # Set the color and API_KEY environment variables
     ]
 
-  # Step 5: Split traffic 50/50 between revisions (Green and Blue)
+  # Step 5: Split traffic between blue and green revisions
   - name: 'gcr.io/cloud-builders/gcloud'
     args: [
-      'run', 'services', 'update-traffic', 'production',  # Cloud Run service name (use 'production')
+      'run', 'services', 'update-traffic', 'production',
       '--region', 'us-east1',
       '--platform', 'managed',
-      '--to-revisions', 'production-green=50,production-blue=50'  # Split traffic 50/50
+      '--to-revisions', 'production-blue-00001-9hp=50,production-green-00001-abc=50'
     ]
