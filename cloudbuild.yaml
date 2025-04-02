@@ -72,22 +72,11 @@ steps:
           GREEN_REVISION=$(gcloud run services describe production-green --region us-central1 --platform managed --format 'value(status.latestRevision.name)')
           echo "Blue Revision: $BLUE_REVISION"
           echo "Green Revision: $GREEN_REVISION"
-          echo "REVISION_BLUE=$BLUE_REVISION" >> $STEP_ENVIRONMENT_VARIABLES
-          echo "REVISION_GREEN=$GREEN_REVISION" >> $STEP_ENVIRONMENT_VARIABLES
-
-  # Step 9: Split Traffic Between Blue and Green Versions
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    args:
-      - 'gcloud'
-      - 'run'
-      - 'services'
-      - 'update-traffic'
-      - 'production'
-      - '--region'
-      - 'us-central1'
-      - '--platform'
-      - 'managed'
-      - '--to-revisions'
-      - '${REVISION_BLUE}=50,${REVISION_GREEN}=50'
+          
+          # Update traffic split after getting the revision names
+          gcloud run services update-traffic production \
+            --region us-central1 \
+            --platform managed \
+            --to-revisions $BLUE_REVISION=50,$GREEN_REVISION=50
 
 timeout: 1200s  # Set timeout as needed
