@@ -1,7 +1,3 @@
-# Michael Niebauer
-# COT 5930-007 COT 4930-001: Cloud Native Development
-# copy of the inline cloudbuild.yaml file
-
 steps:
   - name: gcr.io/cloud-builders/docker
     args:
@@ -42,15 +38,15 @@ options:
   substitutionOption: ALLOW_LOOSE
   logging: CLOUD_LOGGING_ONLY
 substitutions:
-  _DEPLOY_REGION: us-east1
-  _AR_HOSTNAME: us-east1-docker.pkg.dev
+  _AR_HOSTNAME: us-central1-docker.pkg.dev
   _AR_REPOSITORY: cloud-run-source-deploy
   _AR_PROJECT_ID: cot4930-001
   _PLATFORM: managed
-  _TRIGGER_ID: 1dd089e3-66d0-4095-83ae-dc98701dca41
-  _SERVICE_NAME: projectthree
+  _SERVICE_NAME: production3
   REPO_NAME: cot4930
+  _TRIGGER_ID: f0db5444-e4bd-4bd4-b547-28979bb36663
+  _DEPLOY_REGION: us-central1
 tags:
   - gcp-cloud-build-deploy-cloud-run
   - gcp-cloud-build-deploy-cloud-run-managed
-  - projectthree
+  - production3
